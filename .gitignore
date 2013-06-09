@@ -1,0 +1,6 @@
+.DS_Store
+test/fixtures/repos/*
+*.gem
+
+
+Gemfile.lock
