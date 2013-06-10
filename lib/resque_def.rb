@@ -31,7 +31,7 @@ module ResqueDef
         end
       end
       resque_klass.job   = block
-      resque_klass.queue = name
+      resque_klass.queue = resque_name
 
       # assign the object to a constant we can look up later
       resque_klass = self.const_set(resque_klass_name, resque_klass)

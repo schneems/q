@@ -11,6 +11,8 @@ class ResqueDefTest < Test::Unit::TestCase
 
     User.foo(1,2,3)
     User.new.foo(4,5,6)
+
+    assert_equal :foo, User::Foo.instance_variable_get("@queue")
   end
 
   def test_dequeue
@@ -23,5 +25,7 @@ class ResqueDefTest < Test::Unit::TestCase
     Foo.expects(:bar).once
     Foo.early_return_if false
     Foo.early_return_if true
+
+    assert_equal :bar, Foo::Bar.instance_variable_get("@queue")
   end
 end
