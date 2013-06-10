@@ -38,4 +38,9 @@ class Foo
   resque_def :bar do |*args|
     Foo.bar(*args)
   end
+
+  resque_def :early_return_if do |bool|
+    return true if bool
+    Foo.bar
+  end
 end

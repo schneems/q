@@ -18,4 +18,10 @@ class ResqueDefTest < Test::Unit::TestCase
     User.bar("a", "b", "c")
     User.new.bar("a", "b", "c")
   end
+
+  def test_early_returns
+    Foo.expects(:bar).once
+    Foo.early_return_if false
+    Foo.early_return_if true
+  end
 end

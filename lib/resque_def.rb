@@ -8,6 +8,12 @@ module ResqueDef
       # convert resque_name like :delay_send_issues to DelaySendIssues for klass name
       resque_klass_name = resque_name.to_s.capitalize.gsub(/_\S/) {|m| m.upcase}.gsub('_', '')
 
+
+      # convert proc to lambda :(
+      obj = Object.new
+      obj.define_singleton_method(:_, &block)
+      block = obj.method(:_).to_proc
+
       # create the resque klass
       resque_klass = Class.new do
         @queue = resque_name
