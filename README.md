@@ -1,88 +1,96 @@
-## ResqueDef
+## Q
 
-Forget resque boilerplate: focus on your code.
+Forget queue boilerplate: focus on your code.
+
+
+
+
 
 ## Install
 
 In your `Gemfile` add:
 
 ```ruby
-gem 'resque_def'
+gem 'q'
 ```
 
 Then run `$ bundle install`
 
 ## What
 
-I love Resque, but I'm not in love with the amount of code needed to define and use a Resque task to do something like pull a user from a database, find open issues (assuming an issue model) and sending an email might look like this:
+Q is an interface for your queues. Are you using Resque, Sidekiq, delayed_job, queue_classic, or some other queue? Awesome sauce, because with `Q` you can write your queuing code once and re-use against different backends.
 
 ```ruby
-class User < ActiveRecord::Base
-
-  class DelaySendIssues
-    @queue = :delay_send_issues
-
-    def self.perform(id, state)
-      user   = User.find(id)
-      issues = user.issues.where(state: state).all
-      UserMailer.send_issues(user: user, issues: issues).deliver
-    end
-  end
+Q.configure do |config|
+  config.global_queue = :resque
 end
-
-user = User.last
-Resque.enqueue(User::SendDailyTriageEmail, user.id, 'open')
 ```
 
-With ResqueDef, you can include a module, and define and use a Resque job like this:
+Now in your code when you need to enqueue something first you need to
 
 ```ruby
-class User < ActiveRecord::Base
-  include ResqueDef
+class Poro
+  include Q::Methods
+end
+```
 
-  resque_def(:delay_send_issues) do |id, state|
+Now you can define tasks:
+
+```ruby
+class Poro
+  include Q::Methods
+
+
+  queue(:send_issues) do |id, state|
     user   = User.find(id)
     issues = user.issues.where(state: state).all
     UserMailer.send_issues(user: user, issues: issues).deliver
   end
 end
-
-user = User.last
-User.delay_send_issues(user.id, 'open')
 ```
 
-So looking at the boiler plate (and none of the logic) we are reducing this:
-
+And enqueue new tasks:
 
 ```ruby
-  class DelaySendIssues
-    @queue = :delay_send_issues
-
-    def self.perform(id, state)
-    end
-  end
+user  = User.last
+state = 'open'
+Poro.queue.send_issues(user.id, state)
 ```
 
-To this:
+The Q interface expects json-able objects, numbers, arrays, hashes, etc. This is important if you want your code to be re-usable across multiple queue backends.
+
+
+## Config
+
+This gems supports configuring options across queues.
+
+**inline**
 
 ```ruby
-resque_def(:delay_send_issues) do |id, state|
-end
+Q.inline = true
 ```
 
-Pretty cool, huh? To do this, ResqueDef uses simple metaprogramming: `Class.new` is used to define the require class, and then `define_singleton_method` adds our method to the class included `ResqueDef`. Not doing anything too magical. Check out the code for yourself!
+If the underlying queue supports it, the `inline` option will bypass the queueing behavior and run code as it comes. This is very convienent for testing. If a queue does not support this option, an error will be raised.
 
 
-## Serializing Objects
+## Queue Specific Config
 
-By default Resque can only store JSON-able objects (strings, arrays, hashes, booleans). It cannot store active record objects.
+You may find yourself needing to configure options that are specific to the queue you are using
 
-## TIL with Blocks
+```ruby
+```
+
+## No Queue? No Problem
+
+The `Q` library comes with a threaded queue that does not need a backend (such as redis) by default, so you can write your code today and figure out what queue you want to use tomorrow. Note that this threaded queue is very basic and should not be used in production.
+
+
+## Fun with Blocks
 
 You can set default values in blocks like this:
 
 ```ruby
-resque_def(:foo) do |id, state = 'open', username = 'schneems'|
+queue(:foo) do |id, state = 'open', username = 'schneems'|
   # ...
 end
 ```
@@ -90,7 +98,7 @@ end
 You can have an unlimited amount of args using a splat:
 
 ```ruby
-resque_def(:foo) do |id, *args|
+queue(:foo) do |id, *args|
   # ...
 end
 ```
