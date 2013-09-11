@@ -8,6 +8,13 @@ module Q
     end
   end
 
+  class InstanceQueueDefinitionError < StandardError
+    def initialize(obj)
+      msg = "Cannot define a queue on an instance: #{obj}. Try defining it directly on the class #{obj.class}"
+      super(msg)
+    end
+  end
+
   class DuplicateQueueClassError < StandardError
     def initialize(base, duplicate_klass)
       msg = "Cannot create queue class: '#{duplicate_klass}' because #{duplicate_klass} is already defined on #{base}"

@@ -1,11 +1,8 @@
 module Q::Methods::ThreadedInMemoryQueue
-
   def self.included(base)
-    unless ::ThreadedInMemoryQueue.master
-      ::ThreadedInMemoryQueue.start
-      at_exit do
-        ThreadedInMemoryQueue.stop
-      end
+    require 'threaded_in_memory_queue'
+    at_exit do
+      ThreadedInMemoryQueue.stop  unless ::ThreadedInMemoryQueue.stopped?
     end
     super base
   end
@@ -30,7 +27,7 @@ module Q::Methods::ThreadedInMemoryQueue
       queue_name       = options[:queue_name]
       queue_klass_name = options[:queue_klass_name]
 
-      raise Q::DuplicateQueueClassError.new(base, queue_klass_name) if base.const_defined?(queue_klass_name)
+      raise Q::DuplicateQueueClassError.new(base, queue_klass_name) if Q.const_defined_on?(base, queue_klass_name)
 
       queue_klass = Class.new do
         def self.call(*args)
@@ -43,7 +40,7 @@ module Q::Methods::ThreadedInMemoryQueue
       end
 
       queue_klass.job = job
-      queue_klass     = base.const_set(queue_klass_name, queue_klass)
+      base.const_set(queue_klass_name, queue_klass)
       return true
     end
   end
@@ -57,6 +54,7 @@ module Q::Methods::ThreadedInMemoryQueue
 
       raise Q::DuplicateQueueMethodError.new(base, queue_name) if base.queue.respond_to?(queue_name)
       base.queue.define_singleton_method(queue_name) do |*args|
+        ::ThreadedInMemoryQueue.start unless ::ThreadedInMemoryQueue.started?
         ::ThreadedInMemoryQueue.enqueue(queue_klass, *args)
       end
     end

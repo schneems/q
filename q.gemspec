@@ -20,7 +20,10 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency "proc_to_lambda"
   gem.add_dependency "threaded_in_memory_queue"
+
   gem.add_development_dependency "rake"
   gem.add_development_dependency "mocha"
+  gem.add_development_dependency "resque"
+  gem.add_development_dependency "sidekiq"
 end
 

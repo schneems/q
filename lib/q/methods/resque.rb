@@ -1,25 +1,36 @@
 module Q::Methods::Resque
   include Q::Methods::Base
 
-  class Config
+  class QueueConfig
     def self.call
       ::Resque
     end
   end
 
-  class Task
+  class QueueTask
     def self.call(*rake_args)
+      Resque.logger.level ||= Integer(ENV['VVERBOSE'] || 1)
+      ENV['QUEUE']       ||= "*"
+      ENV['VVERBOSE']    = nil
+      define_setup!
+      Rake::Task["resque:work"].invoke(rake_args)
+    end
 
+    def self.define_setup!
+      return true unless Rake::Task.task_defined?("resque:setup")
+      Rake::Task.define_task("resque:setup") do
+        Resque.before_fork = Proc.new { ActiveRecord::Base.establish_connection } if defined?(ActiveRecord)
+      end
     end
   end
 
-  class BuildQueue
+  class QueueBuild
     def self.call(options={}, &job)
       base             = options[:base]
       queue_name       = options[:queue_name]
       queue_klass_name = options[:queue_klass_name]
 
-      raise DuplicateQueueClassError.new(base, queue_klass_name) if base.const_defined?(queue_klass_name)
+      raise Q::DuplicateQueueClassError.new(base, queue_klass_name) if Q.const_defined_on?(base, queue_klass_name)
 
       queue_klass = Class.new do
         def self.perform(*args)
@@ -35,7 +46,7 @@ module Q::Methods::Resque
         end
       end
 
-      queue_klass.job   = block
+      queue_klass.job   = job
       queue_klass.queue = queue_name
 
       queue_klass       = base.const_set(queue_klass_name, queue_klass)
@@ -43,7 +54,7 @@ module Q::Methods::Resque
     end
   end
 
-  class BuildMethod
+  class QueueMethod
     def self.call(options = {})
       base             = options[:base]
       queue_name       = options[:queue_name]

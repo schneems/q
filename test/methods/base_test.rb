@@ -13,8 +13,37 @@ class FakeUserKlass
   include FakeQueueKlass
 end
 
+module FakeIncludesKlass
+  def self.bar(val)
+  end
+
+  def self.included(klass)
+    self.bar
+    super
+  end
+
+  include FakeQueueKlass
+end
+
 class QMethodsBaseTest < Test::Unit::TestCase
 
+  def test_includes_propper_things
+    assert_includes   FakeQueueKlass,    Q::Methods::Base
+    assert_respond_to FakeUserKlass,     :queue
+    assert_respond_to FakeUserKlass.new, :queue
+  end
+
+  def test_queue_klass
+    assert_equal FakeQueueKlass, FakeUserKlass.class_variable_get("@@_q_klass")
+  end
+
+  def test_includes_gets_called
+    FakeIncludesKlass.expects(:bar).once
+    Class.new do
+      include FakeIncludesKlass
+    end
+    assert_includes   FakeIncludesKlass,    Q::Methods::Base
+  end
 
   def test_raises_error_missing_klasses
     # assert no raise
@@ -70,15 +99,5 @@ class QMethodsBaseTest < Test::Unit::TestCase
       Class.new { include foo }
     end
     assert_match "QueueConfig", error.message
-  end
-
-  def test_includes_propper_things
-    assert_includes   FakeQueueKlass, Q::Methods::Base
-    assert_respond_to FakeUserKlass, :queue
-    assert_respond_to FakeUserKlass.new, :queue
-  end
-
-  def test_global_queue_klass
-    assert_equal FakeQueueKlass, FakeUserKlass.class_variable_get("@@_q_klass")
   end
 end

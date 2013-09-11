@@ -18,11 +18,11 @@ Then run `$ bundle install`
 
 ## What
 
-Q is an interface for your queues. Are you using Resque, Sidekiq, delayed_job, queue_classic, or some other queue? Awesome sauce, because with `Q` you can write your queuing code once and re-use against different backends.
+Q is an interface for your background queues. Are you using Resque, Sidekiq, delayed_job, queue_classic, or some other queue? Awesome sauce, because with `Q` you can write your queuing code once and re-use against different backends.
 
 ```ruby
-Q.configure do |config|
-  config.global_queue = :resque
+Q.setup do |config|
+  config.queue = :resque
 end
 ```
 
@@ -34,12 +34,11 @@ class Poro
 end
 ```
 
-Now you can define tasks:
+Now you can define tasks using the `queue` class method like this:
 
 ```ruby
 class Poro
   include Q::Methods
-
 
   queue(:send_issues) do |id, state|
     user   = User.find(id)
@@ -49,7 +48,9 @@ class Poro
 end
 ```
 
-And enqueue new tasks:
+Here we're building a background task called `send_issues` that will send out an email when executed.
+
+Now that the task is defined, you can enqueue a `send_issues` job to be executed later by calling `queue` and then `send_issues` like this:
 
 ```ruby
 user  = User.last
@@ -59,33 +60,83 @@ Poro.queue.send_issues(user.id, state)
 
 The Q interface expects json-able objects, numbers, arrays, hashes, etc. This is important if you want your code to be re-usable across multiple queue backends.
 
+## No Queue? No Problem
+
+The `Q` library comes with a threaded queue that does not need a backend (such as Redis) by default, so you can write your code today and figure out what queue you want to use tomorrow.
+
+Note: that this threaded queue is very basic and should not be used in production. If you stop your Ruby process while there are jobs in memory you will lose your jobs see [threaded_in_memory_queue](https://github.com/schneems/threaded_in_memory_queue) for more information.
+
+## Starting your Queue
+
+Most background queue libraries must be run in a seperate process. The `Q` library makes starting these backgrounds easy.
+
+Make sure there is an `:environment` Rake task that loads your app (Rails provides one by default).
+
+Then in your `Procfile` add this:
+
+```
+worker: bundle exec rake q:work
+```
+
+Now if you are running on Heroku the background task will automatically be run. Locally you can run the task manually by executing:
+
+```sh
+$ bundle exec rake q:work
+```
+
+Or through your `Procfile` with foreman:
+
+```sh
+$ foreman start
+```
+
+If your queueing library supports any custom environment variables or flags you can add them to your `rake q:work` command and they will be passed to the supporting background queue's task.
+
+Note: the default threaded queue does not need to be started as it runs in your web process
 
 ## Config
 
-This gems supports configuring options across queues.
-
-**inline**
+You can configure the behavior of your background queue using `Q.queue_config`. For example if you are using Resque and want to run commands inline you could execute:
 
 ```ruby
-Q.inline = true
+Q.queue_config.inline = true
 ```
 
-If the underlying queue supports it, the `inline` option will bypass the queueing behavior and run code as it comes. This is very convienent for testing. If a queue does not support this option, an error will be raised.
+Now any calls to `enqueue` will bypass resque and be run immediately. Different queues will have different configuration options so you will need to see their docs for configuration options.
 
-
-## Queue Specific Config
-
-You may find yourself needing to configure options that are specific to the queue you are using
+You can access this config in the setup command:
 
 ```ruby
+Q.setup do |config|
+  config.queue = :resque
+  config.queue_config.inline = true
+end
 ```
 
-## No Queue? No Problem
+It also accepts a block:
 
-The `Q` library comes with a threaded queue that does not need a backend (such as redis) by default, so you can write your code today and figure out what queue you want to use tomorrow. Note that this threaded queue is very basic and should not be used in production.
+```ruby
+Q.queue_config do |config|
+  config.inline = true
+end
+```
+
+Don't confuse `queue_config` which will configure your background queue (such as Resque) with `setup` which configures the `Q` library itself.
+
+## Config Backends
+
+```ruby
+if Q.env.resque?
+  # config resque here
+end
+
+if Q.env.sidekiq?
+  # configure sidekiq here
+else
+```
 
 
-## Fun with Blocks
+## Blocks
 
 You can set default values in blocks like this:
 
@@ -103,6 +154,12 @@ queue(:foo) do |id, *args|
 end
 ```
 
+## Q Authors
+
+Did you write a background queuing library? Want to add support for the `Q` interface? Check out the [QUEUE_AUTHORS.md](QUEUE_AUTHORS.md) file to get started.
+
 ## License
+
+Brought to you by [@schneems](http://twitter.com/schneems)
 
 MIT

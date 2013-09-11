@@ -1,7 +1,7 @@
 module Q
   module QueueTask
     def self.call(*args)
-      Q.global_queue::Task.call(args)
+      Q.queue::Task.call(args)
     end
   end
 end

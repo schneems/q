@@ -2,21 +2,27 @@ module Q
   module Methods
     include Q::Methods::Base
 
-    class Task
-      def call(*rake_args)
-        Q.global_queue::Task.call(rake_args)
+    class QueueConfig
+      def self.call
+        Q.queue::QueueConfig
       end
     end
 
-    class BuildQueue
-      def call(options={}, &job)
-        Q.global_queue::BuildQueue.call(options, &job)
+    class QueueTask
+      def self.call(*rake_args)
+        Q.queue::QueueTask.call(rake_args)
       end
     end
 
-    class BuildMethod
-      def call(options = {})
-        Q.global_queue::BuildMethod.call(options)
+    class QueueBuild
+      def self.call(options={}, &job)
+        Q.queue::QueueBuild.call(options, &job)
+      end
+    end
+
+    class QueueMethod
+      def self.call(options = {})
+        Q.queue::QueueMethod.call(options)
       end
     end
   end
