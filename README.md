@@ -22,7 +22,7 @@ Q.setup do |config|
 end
 ```
 
-Now in your code when you need to enqueue something first you need to
+Now in your code when you need to enqueue something first you need to add the `Q::Methods` module:
 
 ```ruby
 class Poro
@@ -64,11 +64,9 @@ Note: that this threaded queue is very basic and should not be used in productio
 
 ## Starting your Queue
 
-Most background queue libraries must be run in a seperate process. The `Q` library makes starting these backgrounds easy.
+Most background queue libraries must be run in a seperate process. The `Q` library makes starting these background tasks easy.
 
-Make sure there is an `:environment` Rake task that loads your app (Rails provides one by default).
-
-Then in your `Procfile` add this:
+Make sure there is a Rake task named `:environment` that loads your app (Rails provides one by default). Then add this line to your `Procfile`:
 
 ```
 worker: bundle exec rake q:work
@@ -119,7 +117,11 @@ end
 
 Don't confuse `queue_config` which will configure your background queue (such as Resque) with `setup` which configures the `Q` library itself.
 
-## Config Backends
+## Diverging Backends
+
+As much as we try to make all front end code similar, you'll still need to setup your queue. To make sqitching back and forth easier, we provide a `Q.env` object that responds to the backend you are using such as `Q.env.resque?`.
+
+That way you could keep multiple queue configurations in your app and it won't raise any errors if you're running a different backend.
 
 ```ruby
 if Q.env.resque?
@@ -130,6 +132,21 @@ if Q.env.sidekiq?
   # configure sidekiq here
 else
 ```
+
+## Supported Queue Backends
+
+```
+config.queue = :sidekiq
+config.queue = :resque
+config.queue = :threaded
+```
+
+Coming soon:
+
+```
+config.queue = :delayed_job
+```
+
 
 
 ## Blocks
@@ -148,20 +165,6 @@ You can have an unlimited amount of args using a splat:
 queue(:foo) do |id, *args|
   # ...
 end
-```
-
-## Supported Queue Backends
-
-```
-config.queue = :sidekiq
-config.queue = :resque
-config.queue = :threaded
-```
-
-Coming soon:
-
-```
-config.queue = :delayed_job
 ```
 
 
