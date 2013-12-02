@@ -15,3 +15,8 @@ end
 def kill_process(pid)
   Process.kill :INT, pid
 end
+
+if defined?(Rake)
+  task = Rake::Task.define_task("environment") do
+  end
+end

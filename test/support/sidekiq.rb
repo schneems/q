@@ -11,16 +11,16 @@ SETUP_SIDEKIQ_NAMESPACE = Proc.new do
 end
 
 def start_sidekiq
-  @sidekiq_stdout= StringIO.new
+  stdout = StringIO.new
   Q::Methods::Sidekiq::QueueConfig.call.inline = false
   pid = Process.fork do
     SETUP_SIDEKIQ_NAMESPACE.call
-    # Object.const_set(:STDOUT, @sidekiq_stdout
-    Sidekiq.logger = Logger.new(@sidekiq_stdout)
+    # Object.const_set(:STDOUT, stdout
+    Sidekiq.logger = Logger.new(stdout)
     Q::Methods::Sidekiq::QueueTask.call
   end
 
-  return pid, @sidekiq_stdout
+  return pid, stdout
 end
 
 

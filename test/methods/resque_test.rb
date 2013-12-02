@@ -31,7 +31,7 @@ class ResqueTest < Test::Unit::TestCase
   def test_resque_non_inline_works
     value = rand(1..99)
     ResqueUser.queue.foo(value)
-    sleep 1
-    assert_match output, "Calling ResqueUser::Foo with value #{value}"
+    sleep 5
+    assert_match "Calling ResqueUser::Foo with value #{value}", output
   end
 end

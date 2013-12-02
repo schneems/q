@@ -8,8 +8,8 @@ Gem::Specification.new do |gem|
   gem.version       = Q::VERSION
   gem.authors       = ["Richard Schneeman"]
   gem.email         = ["richard.schneeman+rubygems@gmail.com"]
-  gem.description   = %q{ Defining Queue boilerplate since 2013 }
-  gem.summary       = %q{ Defining Queue boilerplate since 2013 }
+  gem.description   = %q{ A universal interface for Ruby queueing backends. }
+  gem.summary       = %q{ Use Q to switch betwen queue backends as you please. Simplifies creating and calling background jobs }
   gem.homepage      = "https://github.com/schneems/q"
   gem.license       = "MIT"
 
@@ -26,4 +26,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "resque"
   gem.add_development_dependency "sidekiq"
   gem.add_development_dependency "delayed_job_active_record"
+  gem.add_development_dependency "sqlite3"
 end

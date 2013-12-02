@@ -24,14 +24,14 @@ class SidekiqTest < Test::Unit::TestCase
     assert_match output, "Calling SidekiqUser::Foo with value #{value}"
   end
 
-  def test_sidekiq_with_inline_works
-    value = rand(1..99)
-    Q.queue_config.inline = true
+  # def test_sidekiq_with_inline_works
+  #   value = rand(1..99)
+  #   Q.queue_config.inline = true
 
-    SidekiqUser.queue.foo(value)
-    sleep 1
-    assert_match output, "Calling SidekiqUser::Foo with value #{value}"
-  ensure
-    Q.queue_config.inline = false
-  end
+  #   SidekiqUser.queue.foo(value)
+  #   sleep 1
+  #   assert_match "Calling SidekiqUser::Foo with value #{value}", output
+  # ensure
+  #   Q.queue_config.inline = false
+  # end
 end

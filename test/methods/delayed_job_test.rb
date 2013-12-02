@@ -6,7 +6,7 @@ class DelayedJobUser
   def self.bar; end
 
   queue(:foo) do |value|
-    puts "Calling ResqueUser::Foo with value #{value}"
+    puts "Calling DelayedJobUser::Foo with value #{value}"
     DelayedJobUser.bar
   end
 end
@@ -14,11 +14,11 @@ end
 class DelayedJobTest < Test::Unit::TestCase
 
   def setup
-
+    # @pid, @capture = start_delayed_job
   end
 
   def teardown
-    kill_process(@pid)
+    # kill_process(@pid)
   end
 
   def output
@@ -26,6 +26,10 @@ class DelayedJobTest < Test::Unit::TestCase
     @output << @capture.string
   end
 
-  def test_delayed_job_non_inline_workss
-  end
+  # def test_delayed_job_non_inline_works
+  #   value = rand(1..99)
+  #   DelayedJobUser.queue.foo(value)
+  #   sleep 1
+  #   assert_match "Calling DelayedJobUser::Foo with value #{value}", output
+  # end
 end

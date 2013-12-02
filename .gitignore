@@ -3,3 +3,4 @@ test/fixtures/repos/*
 *.gem
 
 Gemfile.lock
+test/db/

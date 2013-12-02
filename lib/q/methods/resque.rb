@@ -11,8 +11,9 @@ module Q::Methods::Resque
     def self.call(*rake_args)
       Resque.logger.level ||= Integer(ENV['VVERBOSE'] || 1)
       ENV['QUEUE']        ||= "*"
-      ENV['VVERBOSE']     = nil
       ENV['VERBOSE']      ||= "1"
+      ENV['TERM_CHILD']   ||= '1'
+      ENV['VVERBOSE']     = nil
       define_setup!
       Rake::Task["resque:work"].invoke(rake_args)
     end

@@ -10,16 +10,16 @@ SETUP_RESQUE_NAMESPACE = Proc.new do
   Resque.redis.namespace = RESQUE_NAMESPACE
 end
 
+SETUP_RESQUE_NAMESPACE.call
 
 def start_resque
-  @resque_stdout = StringIO.new
+  stdout = StringIO.new
   Resque.inline  = false
   pid = Process.fork do
     SETUP_RESQUE_NAMESPACE.call
-    # Object.const_set(:STDOUT, @resque_stdout)
-    Resque.logger = Logger.new(@resque_stdout)
+    Resque.logger = Logger.new(stdout)
     Q::Methods::Resque::QueueTask.call
   end
 
-  return pid, @resque_stdout
+  return pid, stdout
 end
