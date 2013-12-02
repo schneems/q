@@ -15,11 +15,11 @@ The primary focus of this project is usability for the end user. Ideally they sh
 
 To integrate with `Q` you need to add these abilities programatically. While `Q::Methods::Base` does a lot of heavy lifting (as you'll see) you still need to do a fair amount of meta programming to make all this possible.
 
-For demonstation sake we'll use a ficticious background queuing library called `FooQueue`. It will be very similar to Resque 1.x in implementation.
+For demonstration sake we'll use a fictitious background queuing library called `FooQueue`. It will be very similar to Resque 1.x in implementation.
 
 ## How to Include Your Module with Q
 
-There are default implemtations for several queuing libraries included with `Q` if you own one of them, we invite you to add `Q` as a gem requirement, and then to over-write over-write
+There are default implementations for several queuing libraries included with `Q` if you own one of them, we invite you to add `Q` as a gem requirement, and then to over-write over-write
 
 ## Basics
 
@@ -422,7 +422,7 @@ $ bundle exec rake foo_queue:work VVERBOSE=1 QUEUE=*
 
 The task is `foo_queue:work` and `VVERBOSE` is an environment variable specifying the log level, and `QUEUE` is an environment variable specifying which queues to run, in our case we want to run all of them.
 
-We must call this programatically in our module with the help of our `BuildTask` constant:
+We must call this programmatically in our module with the help of our `BuildTask` constant:
 
 ```ruby
 module Q::Methods::FooQueue
@@ -435,7 +435,7 @@ module Q::Methods::FooQueue
 end
 ```
 
-Here `*rake_args` are any arguments that may need to be passed into the task. In our example above we're not using any, but your non-ficticious queuing library might:
+Here `*rake_args` are any arguments that may need to be passed into the task. In our example above we're not using any, but your non-fictitious queuing library might:
 
 ```ruby
 $ rake your_queue:work[1,2,3]

@@ -10,15 +10,16 @@ module Q::Methods::Resque
   class QueueTask
     def self.call(*rake_args)
       Resque.logger.level ||= Integer(ENV['VVERBOSE'] || 1)
-      ENV['QUEUE']       ||= "*"
-      ENV['VVERBOSE']    = nil
+      ENV['QUEUE']        ||= "*"
+      ENV['VVERBOSE']     = nil
+      ENV['VERBOSE']      ||= "1"
       define_setup!
       Rake::Task["resque:work"].invoke(rake_args)
     end
 
     def self.define_setup!
       return true unless Rake::Task.task_defined?("resque:setup")
-      Rake::Task.define_task("resque:setup") do
+      Rake::Task.define_task("resque:setup" => :environment) do
         Resque.before_fork = Proc.new { ActiveRecord::Base.establish_connection } if defined?(ActiveRecord)
       end
     end

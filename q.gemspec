@@ -25,5 +25,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "mocha"
   gem.add_development_dependency "resque"
   gem.add_development_dependency "sidekiq"
+  gem.add_development_dependency "delayed_job_active_record"
 end
-

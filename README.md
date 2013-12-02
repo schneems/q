@@ -2,10 +2,6 @@
 
 Forget queue boilerplate: focus on your code.
 
-
-
-
-
 ## Install
 
 In your `Gemfile` add:
@@ -153,6 +149,21 @@ queue(:foo) do |id, *args|
   # ...
 end
 ```
+
+## Supported Queue Backends
+
+```
+config.queue = :sidekiq
+config.queue = :resque
+config.queue = :threaded
+```
+
+Coming soon:
+
+```
+config.queue = :delayed_job
+```
+
 
 ## Q Authors
 

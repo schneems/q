@@ -10,7 +10,7 @@ require 'q/helpers'
 require 'q/errors'
 require 'q/methods/base'
 require 'q/methods'
-require 'q/methods/threaded_in_memory_queue'
+require 'q/tasks'
 
 module Q
   extend Q::Helpers
@@ -28,6 +28,7 @@ module Q
   def self.env
     name = queue.to_s.split("::").last
     @env ||= Q.underscore(name)
+
     OpenStruct.new(FALSEY_HASH.merge("#{@env}?" => true))
   end
 
@@ -36,12 +37,38 @@ module Q
     @env          = nil
   end
 
+  def self.module_from_klass_name(name)
+    unless defined?(Q::Methods.const_get(name))
+      require "q/methods/#{name}"
+    end
+    return Q::Methods.const_get(name)
+  rescue LoadError => e
+    raise LoadError, "Could not find queue: #{name}, expected to be defined in q/methods/#{name}\n" + e.message
+  rescue NameError => e
+    raise NameError, "Could not load queue: #{name}, expected to be defined in q/methods/#{name}\n" + e.message
+  end
+
+  def self.module_from_queue_name(queue_name)
+    module_from_klass_name(camelize(queue_name))
+  end
+
+  def self.queue_lookup
+    @queue_lookup ||= Hash.new do |hash, key|
+      hash[key] = -> {
+        require "q/methods/#{key}"
+        const = Q.camelize(key)
+        ::Q::Methods.const_get(const)
+      }
+    end
+    @queue_lookup
+  end
+
   def self.queue=(queue)
     if queue.is_a?(Module)
       @queue_method = queue
     else
-      @env          = queue
-      @queue_method = module_from_queue_name(queue)
+      @env = queue
+      @queue_method = queue_lookup[queue].call
     end
   end
 
@@ -51,3 +78,5 @@ module Q
     @config_class
   end
 end
+
+require 'q/methods/threaded_in_memory_queue'
