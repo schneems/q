@@ -119,7 +119,7 @@ Don't confuse `queue_config` which will configure your background queue (such as
 
 ## Diverging Backends
 
-As much as we try to make all front end code similar, you'll still need to setup your queue. To make sqitching back and forth easier, we provide a `Q.env` object that responds to the backend you are using such as `Q.env.resque?`.
+As much as we try to make all front end code similar, you'll still need to setup your queue. To make switching back and forth easier, we provide a `Q.env` object that responds to the backend you are using such as `Q.env.resque?`.
 
 That way you could keep multiple queue configurations in your app and it won't raise any errors if you're running a different backend.
 
