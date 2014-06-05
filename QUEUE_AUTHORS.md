@@ -61,7 +61,7 @@ end
 
 Without the `Q` library you would need to define a `FooQueue` task as a class:
 
-```
+```ruby
 class SendEmail
   @queue = :send_email
 
@@ -237,7 +237,7 @@ end
 
 Will produce the equivalent code of this:
 
-```
+```ruby
 class Poro
   class SendEmail
     @queue = :send_email
@@ -400,7 +400,7 @@ Poro.queue.send_email(user.id, 'open')
 
 It will be exactly the same as this code:
 
-```
+```ruby
 user = User.first
 FooQueue.enqueue(Poro::SendEmail, user.id, 'open')
 ```
@@ -440,5 +440,3 @@ Here `*rake_args` are any arguments that may need to be passed into the task. In
 ```ruby
 $ rake your_queue:work[1,2,3]
 ```
-
-
